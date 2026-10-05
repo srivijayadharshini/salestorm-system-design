@@ -1,0 +1,144 @@
+Table CUSTOMER {
+  customer_id bigint [pk]
+  name varchar
+  email varchar [unique]
+  phone varchar
+  password_hash varchar
+  status varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table CATEGORY {
+  category_id bigint [pk]
+  name varchar
+  description text
+  created_at timestamp
+}
+
+Table PRODUCT {
+  product_id bigint [pk]
+  category_id bigint [ref: > CATEGORY.category_id]
+  name varchar
+  description text
+  price decimal
+  status varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table SALE {
+  sale_id bigint [pk]
+  name varchar
+  start_time timestamp
+  end_time timestamp
+  status varchar
+  created_at timestamp
+}
+
+Table DEAL {
+  deal_id bigint [pk]
+  sale_id bigint [ref: > SALE.sale_id]
+  product_id bigint [ref: > PRODUCT.product_id]
+  sale_price decimal
+  status varchar
+  created_at timestamp
+}
+
+Table INVENTORY {
+  inventory_id bigint [pk]
+  product_id bigint [ref: > PRODUCT.product_id]
+  available_quantity int
+  reserved_quantity int
+  sold_quantity int
+  version int
+  updated_at timestamp
+}
+
+Table INVENTORY_RESERVATION {
+  reservation_id bigint [pk]
+  inventory_id bigint [ref: > INVENTORY.inventory_id]
+  customer_id bigint [ref: > CUSTOMER.customer_id]
+  quantity int
+  status varchar
+  idempotency_key varchar [unique]
+  expires_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table CART {
+  cart_id bigint [pk]
+  customer_id bigint [ref: > CUSTOMER.customer_id]
+  status varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table CART_ITEM {
+  cart_item_id bigint [pk]
+  cart_id bigint [ref: > CART.cart_id]
+  product_id bigint [ref: > PRODUCT.product_id]
+  quantity int
+  unit_price decimal
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table ORDER {
+  order_id bigint [pk]
+  customer_id bigint [ref: > CUSTOMER.customer_id]
+  reservation_id bigint [ref: > INVENTORY_RESERVATION.reservation_id]
+  status varchar
+  total_amount decimal
+  currency varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table ORDER_ITEM {
+  order_item_id bigint [pk]
+  order_id bigint [ref: > ORDER.order_id]
+  product_id bigint [ref: > PRODUCT.product_id]
+  quantity int
+  unit_price decimal
+  subtotal decimal
+}
+
+Table PAYMENT {
+  payment_id bigint [pk]
+  order_id bigint [ref: > ORDER.order_id]
+  transaction_reference varchar [unique]
+  idempotency_key varchar [unique]
+  amount decimal
+  currency varchar
+  status varchar
+  provider varchar
+  failure_reason text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table SHIPMENT {
+  shipment_id bigint [pk]
+  order_id bigint [ref: > ORDER.order_id]
+  tracking_number varchar [unique]
+  carrier varchar
+  status varchar
+  shipped_at timestamp
+  delivered_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table NOTIFICATION {
+  notification_id bigint [pk]
+  customer_id bigint [ref: > CUSTOMER.customer_id]
+  order_id bigint [ref: > ORDER.order_id]
+  type varchar
+  channel varchar
+  status varchar
+  message text
+  created_at timestamp
+  sent_at timestamp
+}
